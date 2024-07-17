@@ -1,12 +1,11 @@
-package com.hackathon.dementia;
+package com.hackathon.dementia.repository;
 
+import com.hackathon.dementia.models.Patient;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
 @Repository
-public interface PatientRepo extends JpaRepository<Patient, String> {
+public interface PatientRepo extends JpaRepository<Patient, Long> {
 //    List<Patient> findByStatus(String status);
 //    Patient findPatientById(Long id);
 //        return patientRepository.findById(id)

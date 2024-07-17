@@ -1,7 +1,10 @@
-package com.hackathon.dementia;
+package com.hackathon.dementia.models;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.Set;
 
 @Entity
 @Table(name="Patients")
@@ -22,5 +25,8 @@ public class Patient {
     private int age;
     private String gender;
 //    private image
+    @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    @JsonManagedReference
+    private Set<Carer> caretakers;
 
 }
