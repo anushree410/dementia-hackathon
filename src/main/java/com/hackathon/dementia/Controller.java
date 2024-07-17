@@ -11,13 +11,13 @@ import java.util.Optional;
 
 @RestController
 @CrossOrigin
-@RequestMapping("/patients")
+@RequestMapping("/user")
 public class Controller {
 
     @Autowired
     private PatientRepo patientRepo;
 
-    @GetMapping("/getAllPatients")
+    @GetMapping("/getAll")
     public ResponseEntity<List<Patient>> getAllTask(){
         try{
             List<Patient> patientlist = new ArrayList<>();
@@ -27,20 +27,15 @@ public class Controller {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-//    @GetMapping("/{id}")
-//    public ResponseEntity<Patient> getPatientById(@PathVariable Long id) {
-//        Optional<Patient> optionalPatient = patientRepo.findById(id);
-//        if (optionalPatient.isPresent()) {
-//            return new ResponseEntity<>(optionalPatient.get(), HttpStatus.OK);
-//        } else {
-//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//        }
-//    }
-//    @GetMapping("/getByStatus/{status}")
-//    public ResponseEntity<List<Patient>> getTaskByStatus(@PathVariable String status){
-//        List<Patient> taskData = patientRepo.findByStatus(status);
-//        return new ResponseEntity<>(taskData, HttpStatus.OK);
-//    }
+    @GetMapping("getby/{id}")
+    public ResponseEntity<Patient> getPatientById(@PathVariable Long id) {
+        Optional<Patient> optionalPatient = patientRepo.findById(String.valueOf(id));
+        if (optionalPatient.isPresent()) {
+            return new ResponseEntity<>(optionalPatient.get(), HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
 
     @PostMapping("/add")
     public ResponseEntity<Patient> addTask(@RequestBody Patient t){
