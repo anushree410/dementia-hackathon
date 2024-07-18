@@ -201,4 +201,18 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
+    @PostMapping("/{id}/getNotification")
+    public ResponseEntity<List<Notification>> getNotificationsByPatientId(@PathVariable Long id) {
+        try {
+            Optional<Patient> optionalPatient = patientRepo.findById(id);
+            if (!optionalPatient.isPresent()) {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+
+            List<Notification> notis = notificationRepo.findByPatientId(id);
+            return new ResponseEntity<>(notis, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }

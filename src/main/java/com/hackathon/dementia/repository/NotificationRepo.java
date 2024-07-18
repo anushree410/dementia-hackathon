@@ -1,7 +1,6 @@
 package com.hackathon.dementia.repository;
 
 import com.hackathon.dementia.models.Notification;
-import com.hackathon.dementia.models.Schedule;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -12,5 +11,5 @@ import java.util.List;
 @Repository
 public interface NotificationRepo extends JpaRepository<Notification, Long> {
     @Query("SELECT s FROM Notification s WHERE s.patient.id = :patientId")
-    List<Schedule> findByPatientId(@Param("patientId") Long patientId);
+    List<Notification> findByPatientId(@Param("patientId") Long patientId);
 }
