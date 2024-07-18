@@ -24,11 +24,11 @@ public class Schedule {
     private String scheduleday; // Assuming day is represented as a string, e.g., "yyyy-MM-dd"
     private String description;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "patient_id", nullable = false)
     private Patient patient;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "professional_id", nullable = false)
     private Professional professional;
 

@@ -2,6 +2,7 @@ package com.hackathon.dementia.controller;
 
 import com.hackathon.dementia.models.*;
 import com.hackathon.dementia.repository.*;
+import com.hackathon.dementia.service.NotificationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,21 +32,28 @@ public class UserController {
     private ScheduleRepo scheduleRepo;
 
     @Autowired
-    private ProfessionalRepo  professionalRepo;
+    private ProfessionalRepo professionalRepo;
 
     @Autowired
     private MedicineRepo medicineRepo;
 
+    @Autowired
+    private NotificationRepo notificationRepo;
+
+    @Autowired
+    private NotificationService notificationService;
+
     @GetMapping("/getAll")
-    public ResponseEntity<List<Patient>> getAllPatient(){
-        try{
+    public ResponseEntity<List<Patient>> getAllPatient() {
+        try {
             List<Patient> patientlist = new ArrayList<>();
             patientRepo.findAll().forEach(patientlist::add);
             return new ResponseEntity<>(patientlist, HttpStatus.OK);
-        }catch(Exception e) {
+        } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
     @GetMapping("getById/{id}")
     public ResponseEntity<Patient> getPatientById(@PathVariable Long id) {
         Optional<Patient> optionalPatient = patientRepo.findById(id);
@@ -57,15 +65,15 @@ public class UserController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<Patient> addPatient(@RequestBody Patient t){
+    public ResponseEntity<Patient> addPatient(@RequestBody Patient t) {
         Patient tObj = patientRepo.save(t);
         return new ResponseEntity<>(tObj, HttpStatus.OK);
     }
 
     @PostMapping("updatePatientById/{id}")
-    public ResponseEntity<Patient> updatePatientById(@PathVariable String id, @RequestBody Patient newPatientData){
+    public ResponseEntity<Patient> updatePatientById(@PathVariable String id, @RequestBody Patient newPatientData) {
         Optional<Patient> oldpatient = patientRepo.findById(Long.valueOf(id));
-        if (oldpatient.isPresent()){
+        if (oldpatient.isPresent()) {
             Patient updated = oldpatient.get();
             updated.setEmail(newPatientData.getEmail());
             Patient tObj = patientRepo.save(updated);
@@ -153,6 +161,7 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
     @PostMapping("/{id}/addMedicine")
     public ResponseEntity<Medicine> addMedicine(@PathVariable Long id, @RequestBody Medicine medicine) {
         try {
@@ -168,6 +177,7 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
     @GetMapping("/{id}/getMedicines")
     public ResponseEntity<List<Medicine>> getMedicinesByPatientId(@PathVariable Long id) {
         try {
@@ -182,5 +192,13 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
+    @GetMapping("/{id}/loadNotification")
+    public ResponseEntity<Void> loadNotification(@PathVariable Long id) {
+        try {
+            notificationService.loadNotificationsForPatient(id);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
 }
