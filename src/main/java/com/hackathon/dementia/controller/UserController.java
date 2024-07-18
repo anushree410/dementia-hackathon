@@ -113,28 +113,28 @@ public class UserController {
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         AtomicReference<LocalDate> parsedDay = new AtomicReference<>();
         try {
-            parsedDay.set(LocalDate.parse((String) scheduleData.get("day"), dateFormatter));
+            parsedDay.set(LocalDate.parse((String) scheduleData.get("scheduleday"), dateFormatter));
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
-        LocalDateTime startTime = LocalDateTime.parse((String) scheduleData.get("startTime"), timeFormatter);
-        LocalDateTime endTime = LocalDateTime.parse((String) scheduleData.get("endTime"), timeFormatter);
+        LocalDateTime startTime = LocalDateTime.parse((String) scheduleData.get("starttime"), timeFormatter);
+        LocalDateTime endTime = LocalDateTime.parse((String) scheduleData.get("endtime"), timeFormatter);
 
-        Schedule newSchedule = new Schedule(
-                startTime,
-                endTime,
-                parsedDay.get().toString(), // Convert LocalDate back to String if needed
-                (String) scheduleData.get("description"),
-                patientOptional.get(),
-                professionalOptional.get()
-        );
+        Schedule newSchedule = new Schedule();
+        newSchedule.setStarttime(startTime);
+        newSchedule.setEndtime(endTime);
+        newSchedule.setScheduleday(parsedDay.get().toString()); // Convert LocalDate back to String if needed
+        newSchedule.setDescription((String) scheduleData.get("description"));
+        newSchedule.setPatient(patientOptional.get());
+        newSchedule.setProfessional(professionalOptional.get());
 
         Schedule savedSchedule = scheduleRepo.save(newSchedule);
 
         return new ResponseEntity<>(savedSchedule, HttpStatus.CREATED);
     }
+
 
 
 }
