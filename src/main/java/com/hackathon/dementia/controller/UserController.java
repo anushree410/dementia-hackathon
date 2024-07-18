@@ -1,20 +1,15 @@
 package com.hackathon.dementia.controller;
 
-import com.hackathon.dementia.models.Carer;
-import com.hackathon.dementia.models.Professional;
-import com.hackathon.dementia.models.Schedule;
-import com.hackathon.dementia.repository.CarerRepo;
-import com.hackathon.dementia.repository.PatientRepo;
-import com.hackathon.dementia.models.Patient;
-import com.hackathon.dementia.repository.ProfessionalRepo;
-import com.hackathon.dementia.repository.ScheduleRepo;
+import com.hackathon.dementia.models.*;
+import com.hackathon.dementia.repository.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -23,6 +18,8 @@ import java.util.concurrent.atomic.AtomicReference;
 @CrossOrigin
 @RequestMapping("/user")
 public class UserController {
+
+    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     @Autowired
     private PatientRepo patientRepo;
@@ -135,6 +132,23 @@ public class UserController {
         return new ResponseEntity<>(savedSchedule, HttpStatus.CREATED);
     }
 
+    @GetMapping("/{userId}/getschedules")
+    public ResponseEntity<List<Schedule>> getSchedulesByUserId(@PathVariable Long userId) {
+        logger.info("Fetching schedules for user ID: {}", userId);
+        try {
+            Optional<Patient> optionalPatient = patientRepo.findById(userId);
+            if (!optionalPatient.isPresent()) {
+                logger.warn("No patient found with ID: {}", userId);
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
 
+            List<Schedule> schedules = scheduleRepo.findByPatientId(optionalPatient.get().getId());
+            logger.info("Found {} schedules for patient ID: {}", schedules.size(), userId);
+            return new ResponseEntity<>(schedules, HttpStatus.OK);
+        } catch (Exception e) {
+            logger.error("Error fetching schedules for user ID: {}. Error: {}", userId, e.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
 }
