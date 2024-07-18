@@ -1,17 +1,23 @@
 package com.hackathon.dementia.controller;
 
 import com.hackathon.dementia.models.Carer;
+import com.hackathon.dementia.models.Professional;
+import com.hackathon.dementia.models.Schedule;
 import com.hackathon.dementia.repository.CarerRepo;
 import com.hackathon.dementia.repository.PatientRepo;
 import com.hackathon.dementia.models.Patient;
+import com.hackathon.dementia.repository.ProfessionalRepo;
+import com.hackathon.dementia.repository.ScheduleRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 @RestController
 @CrossOrigin
@@ -23,6 +29,12 @@ public class UserController {
 
     @Autowired
     private CarerRepo carerRepo;
+
+    @Autowired
+    private ScheduleRepo scheduleRepo;
+
+    @Autowired
+    private ProfessionalRepo  professionalRepo;
 
     @GetMapping("/getAll")
     public ResponseEntity<List<Patient>> getAllPatient(){
@@ -84,5 +96,45 @@ public class UserController {
         Carer savedCaretaker = carerRepo.save(caretaker);
         return new ResponseEntity<>("Added successfully.", HttpStatus.OK);
     }
+
+    @PostMapping("/{userId}/addschedule")
+    public ResponseEntity<Schedule> addSchedule(@PathVariable Long userId, @RequestBody Map<String, Object> scheduleData) {
+        Optional<Patient> patientOptional = patientRepo.findById(userId);
+        if (!patientOptional.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        Long professionalId = Long.valueOf(scheduleData.get("professional_id").toString());
+        Optional<Professional> professionalOptional = professionalRepo.findById(professionalId);
+        if (!professionalOptional.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        AtomicReference<LocalDate> parsedDay = new AtomicReference<>();
+        try {
+            parsedDay.set(LocalDate.parse((String) scheduleData.get("day"), dateFormatter));
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+        LocalDateTime startTime = LocalDateTime.parse((String) scheduleData.get("startTime"), timeFormatter);
+        LocalDateTime endTime = LocalDateTime.parse((String) scheduleData.get("endTime"), timeFormatter);
+
+        Schedule newSchedule = new Schedule(
+                startTime,
+                endTime,
+                parsedDay.get().toString(), // Convert LocalDate back to String if needed
+                (String) scheduleData.get("description"),
+                patientOptional.get(),
+                professionalOptional.get()
+        );
+
+        Schedule savedSchedule = scheduleRepo.save(newSchedule);
+
+        return new ResponseEntity<>(savedSchedule, HttpStatus.CREATED);
+    }
+
 
 }

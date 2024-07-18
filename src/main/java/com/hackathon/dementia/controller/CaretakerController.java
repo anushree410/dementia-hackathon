@@ -1,7 +1,9 @@
 package com.hackathon.dementia.controller;
 
 import com.hackathon.dementia.models.Carer;
+import com.hackathon.dementia.models.Patient;
 import com.hackathon.dementia.repository.CarerRepo;
+import com.hackathon.dementia.repository.PatientRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +18,9 @@ import java.util.Optional;
 public class CaretakerController {
     @Autowired
     private CarerRepo carerRepo;
+
+    @Autowired
+    private PatientRepo patientRepo;
 
     @GetMapping("/getAll")
     public ResponseEntity<List<Carer>> getAllCarer(){
@@ -43,4 +48,40 @@ public class CaretakerController {
         Carer tObj = carerRepo.save(t);
         return new ResponseEntity<>(tObj, HttpStatus.OK);
     }
+    // Not possible since caretaker-patient_id field not_nullaable
+    @PutMapping("/{id}/updatePatient/{patientId}")
+    public ResponseEntity<?> updateCarerWithPatient(@PathVariable Long id, @PathVariable Long patientId, @RequestBody Carer carerDetails) {
+        Optional<Carer> optionalCarer = carerRepo.findById(id);
+
+        if (!optionalCarer.isPresent()) {
+            return new ResponseEntity<>("Carer not found.", HttpStatus.NOT_FOUND);
+        }
+
+        Carer existingCarer = optionalCarer.get();
+
+        // Update fields of the existing carer object with details from the request body
+        existingCarer.setName(carerDetails.getName());
+        existingCarer.setEmail(carerDetails.getEmail());
+        existingCarer.setPhone(carerDetails.getPhone());
+        existingCarer.setAddress(carerDetails.getAddress());
+        existingCarer.setAge(carerDetails.getAge());
+        existingCarer.setGender(carerDetails.getGender());
+
+        // Fetch the patient entity using the patient ID from path variable
+        Optional<Patient> optionalPatient = patientRepo.findById(patientId);
+        if (!optionalPatient.isPresent()) {
+            return new ResponseEntity<>("Patient not found.", HttpStatus.BAD_REQUEST);
+        }
+
+        // Associate the carer with the patient
+        existingCarer.setPatient(optionalPatient.get());
+
+        // Save the updated carer entity
+        Carer updatedCarer = carerRepo.save(existingCarer);
+
+        return new ResponseEntity<>(updatedCarer, HttpStatus.OK);
+    }
+
+
+
 }

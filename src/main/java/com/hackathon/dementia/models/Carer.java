@@ -24,7 +24,7 @@ public class Carer {
     private String gender;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "patient_id", nullable = false)
+    @JoinColumn(name = "patient_id", nullable = true)
     @JsonBackReference
     private Patient patient;
 }
