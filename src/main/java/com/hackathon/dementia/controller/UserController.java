@@ -33,6 +33,9 @@ public class UserController {
     @Autowired
     private ProfessionalRepo  professionalRepo;
 
+    @Autowired
+    private MedicineRepo medicineRepo;
+
     @GetMapping("/getAll")
     public ResponseEntity<List<Patient>> getAllPatient(){
         try{
@@ -147,6 +150,35 @@ public class UserController {
             return new ResponseEntity<>(schedules, HttpStatus.OK);
         } catch (Exception e) {
             logger.error("Error fetching schedules for user ID: {}. Error: {}", userId, e.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    @PostMapping("/{id}/addMedicine")
+    public ResponseEntity<Medicine> addMedicine(@PathVariable Long id, @RequestBody Medicine medicine) {
+        try {
+            Optional<Patient> optionalPatient = patientRepo.findById(id);
+            if (!optionalPatient.isPresent()) {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+
+            medicine.setPatient(optionalPatient.get()); // Associate the medicine with the patient
+            Medicine savedMedicine = medicineRepo.save(medicine);
+            return new ResponseEntity<>(savedMedicine, HttpStatus.CREATED);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    @GetMapping("/{id}/getMedicines")
+    public ResponseEntity<List<Medicine>> getMedicinesByPatientId(@PathVariable Long id) {
+        try {
+            Optional<Patient> optionalPatient = patientRepo.findById(id);
+            if (!optionalPatient.isPresent()) {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+
+            List<Medicine> medicines = medicineRepo.findByPatientId(optionalPatient.get().getId());
+            return new ResponseEntity<>(medicines, HttpStatus.OK);
+        } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

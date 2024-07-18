@@ -1,6 +1,4 @@
 package com.hackathon.dementia.models;
-
-
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -22,4 +20,8 @@ public class Medicine {
     private String freq;
     private LocalDateTime starttime;
     private LocalDateTime endtime;
+
+    @ManyToOne
+    @JoinColumn(name = "patient_id", nullable = false)
+    private Patient patient;
 }
